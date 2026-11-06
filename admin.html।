@@ -1,1 +1,44 @@
-
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f1f5f9;padding:20px}
+.container{max-width:700px;margin:auto;background:white;padding:22px;border-radius:12px}
+h2{color:#2563eb}
+input,textarea,button{width:100%;padding:12px;margin:8px 0;box-sizing:border-box}
+button{background:#2563eb;color:white;border:0;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>ওয়েবসাইট অ্যাডমিন প্যানেল</h2>
+<h3>সার্ভিসের তথ্য পরিবর্তন</h3>
+<label>ওয়েবসাইটের নাম</label>
+<input id="site" placeholder="ওয়েবসাইটের নাম">
+<label>সার্ভিসের বিবরণ</label>
+<textarea id="details" placeholder="সার্ভিসের বিবরণ লিখুন"></textarea>
+<label>যোগাযোগ নম্বর</label>
+<input id="phone" placeholder="মোবাইল নম্বর">
+<button onclick="saveData()">তথ্য সংরক্ষণ করুন</button>
+<p id="msg"></p>
+</div>
+<script>
+function saveData(){
+const data={
+site:document.getElementById('site').value,
+details:document.getElementById('details').value,
+phone:document.getElementById('phone').value
+};
+localStorage.setItem('websiteData',JSON.stringify(data));
+document.getElementById('msg').innerText='তথ্য সংরক্ষিত হয়েছে!';
+}
+const old=JSON.parse(localStorage.getItem('websiteData')||'{}');
+document.getElementById('site').value=old.site||'';
+document.getElementById('details').value=old.details||'';
+document.getElementById('phone').value=old.phone||'';
+</script>
+</body>
+</html>
