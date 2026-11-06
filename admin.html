@@ -71,9 +71,7 @@ await loadData();
 
 async function loadData(){
 const {data,error}=await db.from('site_settings')
-.select('*')
-.eq('setting_name','main')
-.maybeSingle();
+.select('*').eq('setting_name','main').maybeSingle();
 
 if(error){msg(error.message);return;}
 
@@ -99,8 +97,7 @@ site_name:document.getElementById('site').value,
 service_details:document.getElementById('details').value,
 contact_phone:document.getElementById('phone').value,
 updated_at:new Date().toISOString()
-})
-.eq('setting_name','main');
+}).eq('setting_name','main');
 
 msg(error?error.message:'তথ্য সফলভাবে সংরক্ষিত হয়েছে!');
 }
