@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -8,7 +9,7 @@
 body{font-family:Arial;background:#f1f5f9;padding:20px}
 .box{max-width:500px;margin:40px auto;background:white;padding:22px;border-radius:12px}
 input,textarea,button{width:100%;padding:13px;margin:9px 0;box-sizing:border-box}
-button{background:#2563eb;color:white;border:0;border-radius:6px}
+button{background:#2563eb;color:white;border:0;border-radius:6px;cursor:pointer}
 h2{color:#2563eb}
 </style>
 </head>
@@ -26,7 +27,7 @@ h2{color:#2563eb}
 <div id="panel" hidden>
 <h3>ওয়েবসাইটের তথ্য পরিবর্তন</h3>
 <label>ওয়েবসাইটের নাম</label>
-<input id="site">
+<input id="site" placeholder="DT WEB DESIGN">
 <label>সার্ভিসের বিবরণ</label>
 <textarea id="details"></textarea>
 <label>যোগাযোগ নম্বর</label>
@@ -34,54 +35,79 @@ h2{color:#2563eb}
 <button onclick="saveData()">তথ্য সংরক্ষণ করুন</button>
 <button onclick="logout()">লগআউট</button>
 </div>
-<p id="msg"></p>
+<p id="message"></p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const db = supabase.createClient(
+const db = window.supabase.createClient(
 'https://xobajhqqgtbiybaaswbf.supabase.co',
 'sb_publishable_5u2_C7OL5ZiPo1ObWQuWkQ_sX_E2fHS'
 );
 
+const ADMIN_EMAIL = 'delwarhosain92@gmail.com';
+
+const msg = text => {
+document.getElementById('message').innerText = text;
+};
+
 async function login(){
-const {error}=await db.auth.signInWithPassword({
-email:document.getElementById('email').value,
-password:document.getElementById('password').value
-});
+const email = document.getElementById('email').value.trim();
+const password = document.getElementById('password').value;
+
+if(email.toLowerCase() !== ADMIN_EMAIL){
+msg('এই ইমেইল অ্যাডমিনের জন্য অনুমোদিত নয়।');
+return;
+}
+
+const {error} = await db.auth.signInWithPassword({email,password});
+
 if(error){msg(error.message);return;}
-document.getElementById('login').hidden=true;
-document.getElementById('panel').hidden=false;
+
+document.getElementById('login').hidden = true;
+document.getElementById('panel').hidden = false;
 await loadData();
 }
 
 async function loadData(){
-const {data,error}=await db.from('website_settings')
-.select('*').eq('id',1).single();
+const {data,error} = await db.from('site_settings')
+.select('*').eq('setting_name','main').maybeSingle();
+
 if(error){msg(error.message);return;}
-site.value=data.site_name||'';
-details.value=data.service_details||'';
-phone.value=data.contact_phone||'';
+
+if(data){
+document.getElementById('site').value = data.site_name || '';
+document.getElementById('details').value = data.service_details || '';
+document.getElementById('phone').value = data.contact_phone || '';
+}
 }
 
 async function saveData(){
-const {error}=await db.from('website_settings')
+const {data: userData} = await db.auth.getUser();
+
+if(!userData.user || userData.user.email.toLowerCase() !== ADMIN_EMAIL){
+msg('অ্যাডমিন অনুমতি নেই।');
+return;
+}
+
+const {error} = await db.from('site_settings')
 .update({
-site_name:site.value,
-service_details:details.value,
-contact_phone:phone.value,
-updated_at:new Date().toISOString()
-}).eq('id',1);
-msg(error?error.message:'তথ্য সফলভাবে সংরক্ষিত হয়েছে!');
+site_name: document.getElementById('site').value,
+service_details: document.getElementById('details').value,
+contact_phone: document.getElementById('phone').value,
+updated_at: new Date().toISOString()
+}).eq('setting_name','main');
+
+msg(error ? error.message : 'তথ্য সফলভাবে সংরক্ষিত হয়েছে!');
 }
 
 async function logout(){
 await db.auth.signOut();
-document.getElementById('panel').hidden=true;
-document.getElementById('login').hidden=false;
+document.getElementById('panel').hidden = true;
+document.getElementById('login').hidden = false;
+document.getElementById('password').value = '';
+msg('লগআউট হয়েছে।');
 }
-
-const msg = text => document.getElementById('msg').innerText=text;
 </script>
 </body>
 </html>
